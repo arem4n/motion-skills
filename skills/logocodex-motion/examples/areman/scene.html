@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AreMan — escudo de linaje (LogocodeX motion)</title>
+<style>
+  /* Sable y Argent: el canon heráldico del manual. Un solo acento (rojo óxido, paleta "Códice Prehispánico")
+     se usa únicamente para revelar la capa tipomórfica A + M. */
+  :root { --paper: #f6f4ee; --ink: #0a0a0b; --oxide: #9c3d2a; }
+  html, body { margin: 0; height: 100%; background: var(--paper); overflow: hidden; }
+  #frame { position: absolute; inset: 0; display: grid; place-items: center; }
+  #logo { position: relative; }
+</style>
+</head>
+<body>
+<div id="frame"><div id="logo"></div></div>
+
+<script src="vendor/gsap.min.js"></script>
+<script src="lib/motion-kit.js"></script>
+<script src="tokens.js"></script>
+<script src="layers.js"></script>
+<script src="timeline.js"></script>
+<script>
+(function () {
+  var params = new URLSearchParams(location.search);
+  var archetype = params.get('archetype') || 'ancestro';   // arquetipo primario del caso AreMan
+  var kit = MotionKit.use(window.gsap);
+  var T = kit.tokens(window.TOKENS, archetype);
+
+  // el logo ocupa ~88% del lado limitante del encuadre, centrado
+  var vb = window.LAYERS.viewBox, ratio = vb[2] / vb[3];
+  var box = document.getElementById('logo');
+  box.style.width = 'min(88vw, calc(88vh * ' + ratio + '))';
+  box.style.aspectRatio = vb[2] + ' / ' + vb[3];
+
+  var stg = kit.stage(box, window.LAYERS, { ink: '#0a0a0b' });
+  var tl = gsap.timeline({ paused: true });
+
+  var end = buildTimeline(kit, stg, T, tl);
+
+  kit.expose(tl);
+})();
+</script>
+</body>
+</html>

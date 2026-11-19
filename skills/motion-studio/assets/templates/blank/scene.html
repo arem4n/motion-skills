@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>motion-studio — escena</title>
+<link rel="stylesheet" href="fonts.css">
+<script src="vendor/gsap.min.js"></script>
+<script src="lib/mg.js"></script>
+<script src="tokens.js"></script>
+<script src="timeline.js"></script>
+</head>
+<body>
+<script>
+/* Loader: no animation lives here. Edit timeline.js (window.SCENE.build). */
+(function () {
+  var q = new URLSearchParams(location.search);
+  MG.use(window.gsap);
+  var T = MG.tokens(window.TOKENS, q.get('personality') || '__PERSONALITY__');
+  MG.ready(__FONTS__, function () {
+    var S = MG.stage({ w: +q.get('w') || __W__, h: +q.get('h') || __H__, bg: window.SCENE.bg });   // ?w= / ?h= cambian el formato sin editar nada (render.py --size los pasa solo)
+    var tl = gsap.timeline({ paused: true });
+    var end = window.SCENE.build(MG, T, S, tl);
+    tl.set({}, {}, end);                       // total duration = `end`
+    MG.expose(tl);
+  });
+})();
+</script>
+</body>
+</html>

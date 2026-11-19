@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>TommyBox — isotipo (LogocodeX motion)</title>
+<style>
+  /* Isotipo blanco sobre carbón. La marca no tiene acento definido en este caso: no se inventa uno. */
+  :root { --paper: #0c0c0e; --ink: #ffffff; --accent: #ffffff; }
+  html, body { margin: 0; height: 100%; background: var(--paper); overflow: hidden; }
+  #frame { position: absolute; inset: 0; display: grid; place-items: center; }
+  #logo { position: relative; }
+</style>
+</head>
+<body>
+<div id="frame"><div id="logo"></div></div>
+
+<script src="vendor/gsap.min.js"></script>
+<script src="lib/motion-kit.js"></script>
+<script src="tokens.js"></script>
+<script src="layers.js"></script>
+<script src="timeline.js"></script>
+<script>
+(function () {
+  var params = new URLSearchParams(location.search);
+  var archetype = params.get('archetype') || 'heroe';   // arquetipo primario de TommyBox
+  var kit = MotionKit.use(window.gsap);
+  var T = kit.tokens(window.TOKENS, archetype);
+
+  // el logo ocupa ~88% del lado limitante del encuadre, centrado
+  var vb = window.LAYERS.viewBox, ratio = vb[2] / vb[3];
+  var box = document.getElementById('logo');
+  box.style.width = 'min(88vw, calc(88vh * ' + ratio + '))';
+  box.style.aspectRatio = vb[2] + ' / ' + vb[3];
+
+  var stg = kit.stage(box, window.LAYERS, { ink: '#ffffff' });
+  var tl = gsap.timeline({ paused: true });
+
+  var end = buildTimeline(kit, stg, T, tl);
+
+  kit.expose(tl);
+})();
+</script>
+</body>
+</html>

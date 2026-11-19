@@ -1,0 +1,101 @@
+{
+  "_doc": "Archetype -> motion personality. tempo multiplies every duration (>1 = slower). ease.in is for things arriving, ease.move for things travelling, ease.settle for the last 20% of a gesture. stagger is the base delay between siblings. overshoot is how far a move may pass its target (0 = never). hold is the silence, in seconds, left after a beat lands. cut=true means hard cuts / snaps are on-brand. Sources: Mark & Pearson archetypes from the LogocodeX manual (fear column drives `avoid`).",
+  "defaults": {
+    "tempo": 1.0,
+    "ease": { "in": "power2.out", "move": "power2.inOut", "settle": "sine.out" },
+    "stagger": 0.1,
+    "overshoot": 0,
+    "hold": 0.4,
+    "drift": 1.015,
+    "cut": false,
+    "rhythm": "legato",
+    "entrance": "rise",
+    "avoid": []
+  },
+  "archetypes": {
+    "heroe": {
+      "label": "El Héroe", "tempo": 0.85,
+      "ease": { "in": "power3.out", "move": "power3.inOut", "settle": "power2.out" },
+      "stagger": 0.06, "hold": 0.25, "drift": 1.04, "rhythm": "ascendente", "entrance": "ascend",
+      "avoid": ["fades sin dirección", "movimientos que caen o se rinden", "ease con rebote"]
+    },
+    "creador": {
+      "label": "El Creador", "tempo": 1.0,
+      "ease": { "in": "power2.out", "move": "back.out(1.2)", "settle": "sine.out" },
+      "stagger": 0.1, "overshoot": 0.12, "hold": 0.35, "rhythm": "constructivo", "entrance": "assemble",
+      "avoid": ["plantillas de presets idénticos para todas las piezas", "entradas genéricas de fade"]
+    },
+    "forajido": {
+      "label": "El Forajido", "tempo": 0.6,
+      "ease": { "in": "expo.out", "move": "power4.inOut", "settle": "power3.out" },
+      "stagger": 0.03, "hold": 0.1, "drift": 1.06, "cut": true, "rhythm": "staccato", "entrance": "snap",
+      "avoid": ["suavidad corporativa", "simetría perfecta y calma", "sans-serif tímido"]
+    },
+    "sabio": {
+      "label": "El Sabio", "tempo": 1.3,
+      "ease": { "in": "sine.out", "move": "sine.inOut", "settle": "sine.out" },
+      "stagger": 0.14, "hold": 0.6, "drift": 1.012, "rhythm": "legato", "entrance": "reveal",
+      "avoid": ["prisa", "efectos llamativos sin función", "rebotes"]
+    },
+    "inocente": {
+      "label": "El Inocente", "tempo": 1.1,
+      "ease": { "in": "sine.out", "move": "sine.inOut", "settle": "sine.out" },
+      "stagger": 0.1, "hold": 0.5, "drift": 1.01, "rhythm": "suave", "entrance": "fade-rise",
+      "avoid": ["cortes bruscos", "sombras o glitches", "movimientos que sugieran error"]
+    },
+    "explorador": {
+      "label": "El Explorador", "tempo": 1.0,
+      "ease": { "in": "power2.out", "move": "power1.inOut", "settle": "sine.out" },
+      "stagger": 0.1, "hold": 0.3, "drift": 1.07, "rhythm": "travesía", "entrance": "travel",
+      "avoid": ["composición estática y encerrada", "loops cerrados sin avance"]
+    },
+    "gobernante": {
+      "label": "El Gobernante", "tempo": 1.2,
+      "ease": { "in": "power2.inOut", "move": "power2.inOut", "settle": "power1.out" },
+      "stagger": 0.18, "hold": 0.8, "drift": 1.01, "rhythm": "ceremonial", "entrance": "descend",
+      "avoid": ["caos", "asimetría accidental", "movimientos juguetones"]
+    },
+    "mago": {
+      "label": "El Mago", "tempo": 1.1,
+      "ease": { "in": "expo.out", "move": "expo.inOut", "settle": "sine.out" },
+      "stagger": 0.08, "hold": 0.5, "rhythm": "revelación", "entrance": "morph",
+      "avoid": ["transiciones planas de corte", "trucos sin consecuencia narrativa"]
+    },
+    "amante": {
+      "label": "El Amante", "tempo": 1.25,
+      "ease": { "in": "sine.inOut", "move": "sine.inOut", "settle": "sine.out" },
+      "stagger": 0.12, "hold": 0.45, "rhythm": "fluido", "entrance": "bloom",
+      "avoid": ["geometría rígida", "cortes secos", "movimientos mecánicos"]
+    },
+    "cuidador": {
+      "label": "El Cuidador", "tempo": 1.15,
+      "ease": { "in": "power2.out", "move": "sine.inOut", "settle": "back.out(1.4)" },
+      "stagger": 0.12, "overshoot": 0.06, "hold": 0.5, "drift": 1.015, "rhythm": "abrazo", "entrance": "embrace",
+      "avoid": ["agresividad", "salidas que abandonan el encuadre", "ritmo apurado"]
+    },
+    "bufon": {
+      "label": "El Bufón", "tempo": 0.7,
+      "ease": { "in": "elastic.out(1, 0.55)", "move": "bounce.out", "settle": "back.out(2)" },
+      "stagger": 0.05, "overshoot": 0.3, "hold": 0.15, "rhythm": "pulso", "entrance": "pop",
+      "avoid": ["solemnidad", "pausas largas", "simetría ceremonial"]
+    },
+    "huerfano": {
+      "label": "El Huérfano", "tempo": 1.0,
+      "ease": { "in": "power1.out", "move": "power1.inOut", "settle": "sine.out" },
+      "stagger": 0.08, "hold": 0.3, "rhythm": "llano", "entrance": "plain",
+      "avoid": ["efectos que busquen destacar", "glamour", "promesas visuales exageradas"]
+    },
+    "ancestro": {
+      "label": "El Ancestro / Anciano Sabio (caso AreMan)", "tempo": 1.35,
+      "ease": { "in": "expo.out", "move": "power2.inOut", "settle": "sine.out" },
+      "stagger": 0.15, "hold": 0.9, "drift": 1.02, "rhythm": "legato-pétreo", "entrance": "emerge",
+      "avoid": ["rebotes", "velocidad de redes sociales", "efectos modernos que rompan la atemporalidad"]
+    },
+    "guardian": {
+      "label": "El Guardián del Umbral (caso AreMan)", "tempo": 1.0,
+      "ease": { "in": "power3.out", "move": "power2.inOut", "settle": "power2.out" },
+      "stagger": 0.12, "hold": 0.6, "drift": 1.015, "rhythm": "vigilante", "entrance": "close-in",
+      "avoid": ["asimetría que rompa el eje", "entradas por un solo lado"]
+    }
+  }
+}

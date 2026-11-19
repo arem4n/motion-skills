@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>LogocodeX motion — escena</title>
+<style>
+  /* Paleta: toma las de la sección 5.3 del manual de la marca (primaria por arquetipo/mito + secundaria).
+     Si la marca es heráldica/monocromática, deja Sable y Argent y usa un solo acento. */
+  :root { --paper: #f6f4ee; --ink: #0a0a0b; --accent: #9c3d2a; }
+  html, body { margin: 0; height: 100%; background: var(--paper); overflow: hidden; }
+  #frame { position: absolute; inset: 0; display: grid; place-items: center; }
+</style>
+</head>
+<body>
+<div id="frame"><div id="logo"></div></div>
+
+<script src="vendor/gsap.min.js"></script>
+<script src="lib/motion-kit.js"></script>
+<script src="tokens.js"></script>
+<script src="layers.js"></script>
+<script src="timeline.js"></script>
+<script>
+(function () {
+  var params = new URLSearchParams(location.search);
+  var archetype = params.get('archetype') || '__ARCHETYPE__';
+  var kit = MotionKit.use(window.gsap);
+  var T = kit.tokens(window.TOKENS, archetype);
+
+  var vb = window.LAYERS.viewBox, ratio = vb[2] / vb[3];
+  var box = document.getElementById('logo');
+  box.style.width = 'min(88vw, calc(88vh * ' + ratio + '))';
+  box.style.aspectRatio = vb[2] + ' / ' + vb[3];
+
+  var stg = kit.stage(box, window.LAYERS, { ink: '#0a0a0b' });
+  var tl = gsap.timeline({ paused: true });
+
+  var end = buildTimeline(kit, stg, T, tl);
+
+  kit.expose(tl);
+})();
+</script>
+</body>
+</html>

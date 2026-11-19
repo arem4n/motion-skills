@@ -1,0 +1,11 @@
+{
+  "width": 2000,
+  "threshold": 128,
+  "mode": "alpha",
+  "layers": [
+    { "name": "head", "rect": [640, 220, 960, 540], "keep": "largest_component" },
+    { "name": "bar",  "rect": [360, 540, 1252, 808], "keep": "largest_component", "overlap": 2 },
+    { "name": "stem", "rect": [360, 808, 1000, 1600], "keep": "largest_component", "overlap": 2 },
+    { "name": "box",  "rest": true }
+  ]
+}

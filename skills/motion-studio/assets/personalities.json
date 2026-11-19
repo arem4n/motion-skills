@@ -1,0 +1,52 @@
+{
+  "_note": "Motion personalities for motion-studio. tempo multiplies every duration (lower = faster). ease.in = entrances (decelerate), ease.out = exits (accelerate), move = on-screen travel, pop = overshoot entrance. Adapted in spirit from the personality/timing tables of LottieFiles motion-design-skill (MIT), re-scaled from UI milliseconds to film seconds.",
+  "defaults": {
+    "tempo": 1.0,
+    "ease": { "in": "power3.out", "out": "power2.in", "move": "power2.inOut", "settle": "sine.out", "pop": "back.out(1.7)" },
+    "stagger": 0.08,
+    "overshoot": 0,
+    "hold": 0.6,
+    "camera": 0.04,
+    "rhythm": "even",
+    "sfx": { "bed": "quiet" },
+    "avoid": []
+  },
+  "personalities": {
+    "playful": {
+      "label": "Juguetón", "tempo": 0.85,
+      "ease": { "in": "back.out(1.8)", "out": "power2.in", "move": "power2.inOut", "pop": "back.out(2.4)" },
+      "stagger": 0.07, "overshoot": 0.15, "hold": 0.5, "camera": 0.05, "rhythm": "bouncy",
+      "avoid": ["easing lineal", "movimientos rígidos o corporativos"]
+    },
+    "premium": {
+      "label": "Premium / elegante", "tempo": 1.3,
+      "ease": { "in": "expo.out", "out": "power2.in", "move": "power3.inOut", "pop": "power3.out" },
+      "stagger": 0.12, "overshoot": 0, "hold": 0.9, "camera": 0.03, "rhythm": "legato",
+      "avoid": ["rebotes", "más de dos movimientos simultáneos", "colores saturados en el movimiento"]
+    },
+    "corporate": {
+      "label": "Corporativo / claro", "tempo": 1.0,
+      "ease": { "in": "power3.out", "out": "power2.in", "move": "power2.inOut", "pop": "back.out(1.1)" },
+      "stagger": 0.08, "overshoot": 0.03, "hold": 0.6, "camera": 0.02, "rhythm": "even",
+      "avoid": ["rebotes exagerados", "giros", "efectos de sonido llamativos"]
+    },
+    "energetic": {
+      "label": "Enérgico / dinámico", "tempo": 0.75,
+      "ease": { "in": "expo.out", "out": "power3.in", "move": "power3.inOut", "pop": "back.out(2.2)" },
+      "stagger": 0.05, "overshoot": 0.2, "hold": 0.3, "camera": 0.07, "rhythm": "staccato",
+      "avoid": ["pausas largas", "easing suave sin ataque", "legato"]
+    },
+    "calm": {
+      "label": "Calmo / editorial", "tempo": 1.5,
+      "ease": { "in": "sine.out", "out": "sine.in", "move": "sine.inOut", "pop": "sine.out" },
+      "stagger": 0.16, "overshoot": 0, "hold": 1.1, "camera": 0.025, "rhythm": "legato",
+      "avoid": ["golpes secos", "cortes rápidos", "rebotes"]
+    },
+    "impact": {
+      "label": "Impacto / deportivo", "tempo": 0.7,
+      "ease": { "in": "power4.out", "out": "power3.in", "move": "power3.inOut", "pop": "back.out(1.5)" },
+      "stagger": 0.045, "overshoot": 0.08, "hold": 0.25, "camera": 0.08, "rhythm": "ascendente",
+      "avoid": ["fundidos sin dirección", "caídas o rendiciones", "rebotes tipo goma"]
+    }
+  }
+}

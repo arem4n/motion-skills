@@ -1,0 +1,173 @@
+{
+ "_note": "Kenney (kenney.nl), CC0. Elegidos por medición (duración, pico, brillo), no por oído. peak = segundos hasta el pico: el pico cae en el t de la señal.",
+ "cues": {
+  "hit": [
+   {
+    "file": "hit/impactSoft_heavy_000.ogg",
+    "peak": 0.006,
+    "gain_db": 0,
+    "dur": 0.527
+   },
+   {
+    "file": "hit/impactSoft_heavy_001.ogg",
+    "peak": 0.006,
+    "gain_db": 0,
+    "dur": 0.569
+   },
+   {
+    "file": "hit/impactSoft_heavy_002.ogg",
+    "peak": 0.006,
+    "gain_db": 0,
+    "dur": 0.569
+   },
+   {
+    "file": "hit/impactSoft_heavy_003.ogg",
+    "peak": 0.007,
+    "gain_db": 0,
+    "dur": 0.541
+   },
+   {
+    "file": "hit/impactSoft_heavy_004.ogg",
+    "peak": 0.006,
+    "gain_db": 0,
+    "dur": 0.498
+   }
+  ],
+  "thud": [
+   {
+    "file": "thud/impactSoft_medium_000.ogg",
+    "peak": 0.005,
+    "gain_db": -2,
+    "dur": 0.115
+   },
+   {
+    "file": "thud/impactSoft_medium_001.ogg",
+    "peak": 0.005,
+    "gain_db": -2,
+    "dur": 0.18
+   },
+   {
+    "file": "thud/impactSoft_medium_002.ogg",
+    "peak": 0.005,
+    "gain_db": -2,
+    "dur": 0.132
+   },
+   {
+    "file": "thud/impactSoft_medium_003.ogg",
+    "peak": 0.005,
+    "gain_db": -2,
+    "dur": 0.137
+   },
+   {
+    "file": "thud/impactSoft_medium_004.ogg",
+    "peak": 0.005,
+    "gain_db": -2,
+    "dur": 0.144
+   }
+  ],
+  "tick": [
+   {
+    "file": "tick/click_001.ogg",
+    "peak": 0.001,
+    "gain_db": -9,
+    "dur": 0.097
+   },
+   {
+    "file": "tick/click_002.ogg",
+    "peak": 0.0,
+    "gain_db": -9,
+    "dur": 0.012
+   },
+   {
+    "file": "tick/click_003.ogg",
+    "peak": 0.0,
+    "gain_db": -9,
+    "dur": 0.007
+   },
+   {
+    "file": "tick/click_004.ogg",
+    "peak": 0.0,
+    "gain_db": -9,
+    "dur": 0.022
+   },
+   {
+    "file": "tick/click_005.ogg",
+    "peak": 0.001,
+    "gain_db": -9,
+    "dur": 0.007
+   }
+  ],
+  "step": [
+   {
+    "file": "step/footstep_concrete_000.ogg",
+    "peak": 0.001,
+    "gain_db": -6,
+    "dur": 0.103
+   },
+   {
+    "file": "step/footstep_concrete_001.ogg",
+    "peak": 0.001,
+    "gain_db": -6,
+    "dur": 0.105
+   },
+   {
+    "file": "step/footstep_concrete_002.ogg",
+    "peak": 0.001,
+    "gain_db": -6,
+    "dur": 0.11
+   },
+   {
+    "file": "step/footstep_concrete_003.ogg",
+    "peak": 0.001,
+    "gain_db": -6,
+    "dur": 0.108
+   },
+   {
+    "file": "step/footstep_concrete_004.ogg",
+    "peak": 0.001,
+    "gain_db": -6,
+    "dur": 0.111
+   }
+  ],
+  "pop": [
+   {
+    "file": "pop/drop_001.ogg",
+    "peak": 0.0,
+    "gain_db": -4,
+    "dur": 0.132
+   },
+   {
+    "file": "pop/drop_002.ogg",
+    "peak": 0.0,
+    "gain_db": -4,
+    "dur": 0.188
+   },
+   {
+    "file": "pop/drop_003.ogg",
+    "peak": 0.0,
+    "gain_db": -4,
+    "dur": 0.188
+   }
+  ],
+  "shimmer": [
+   {
+    "file": "shimmer/impactBell_heavy_000.ogg",
+    "peak": 0.001,
+    "gain_db": -5,
+    "dur": 1.48
+   },
+   {
+    "file": "shimmer/impactBell_heavy_003.ogg",
+    "peak": 0.001,
+    "gain_db": -5,
+    "dur": 0.654
+   },
+   {
+    "file": "shimmer/impactBell_heavy_004.ogg",
+    "peak": 0.002,
+    "gain_db": -5,
+    "dur": 0.299
+   }
+  ]
+ }
+}
