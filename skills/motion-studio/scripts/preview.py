@@ -13,10 +13,8 @@ render final no. Sin sonido (las señales se marcan sobre la barra). Ctrl+C para
 import argparse
 import functools
 import http.server
-import json
 import os
 import pathlib
-import re
 import subprocess
 import time
 
@@ -43,12 +41,12 @@ button:hover{border-color:var(--acc)}#play{min-width:76px}
 <label>formato <select id="fmt"></select></label><label><input type="checkbox" id="loop" checked> bucle</label>
 <span id="t">0.000 s</span><span id="msg">cargando…</span></div></div>
 <script>
-var DEF = __SIZE__, FMTS = {"escena": DEF, "9x16": [1080, 1920], "16x9": [1920, 1080], "1x1": [1080, 1080], "4x5": [1080, 1350]};
+var FMTS = {"escena": null, "9x16": [1080, 1920], "16x9": [1920, 1080], "1x1": [1080, 1080], "4x5": [1080, 1350]};
 var f = document.getElementById('f'), wrap = document.getElementById('wrap'), sc = document.getElementById('scrub'), tl = document.getElementById('t'),
     msg = document.getElementById('msg'), fmt = document.getElementById('fmt'), track = document.getElementById('track');
-Object.keys(FMTS).forEach(function (k) { var o = document.createElement('option'); o.value = k; o.textContent = k + ' (' + FMTS[k].join('×') + ')'; fmt.appendChild(o); });
+Object.keys(FMTS).forEach(function (k) { var o = document.createElement('option'); o.value = k; o.textContent = FMTS[k] ? k + ' (' + FMTS[k].join('×') + ')' : 'tamaño de la escena'; fmt.appendChild(o); });
 var q = new URLSearchParams(location.search); if (q.get('fmt') && FMTS[q.get('fmt')]) fmt.value = q.get('fmt');
-var W, H, dur = 0, t = 0, playing = false, last = 0, stamp = null, FPS = 30;
+var W, H, dur = 0, t = 0, playing = false, last = 0, stamp = '__STAMP__', FPS = 30;   // marca del servidor al servir la página: un cambio inmediato también recarga
 function win() { return f.contentWindow; }
 function fit() {
   var st = document.getElementById('stage'), s = Math.min((st.clientWidth - 24) / W, (st.clientHeight - 24) / H);
@@ -60,17 +58,20 @@ function show(nt) {
   sc.value = t; tl.textContent = t.toFixed(3) + ' s  ·  cuadro ' + Math.round(t * FPS);
 }
 function load(keepT) {
-  var sz = FMTS[fmt.value]; W = sz[0]; H = sz[1]; fit();
+  var sz = FMTS[fmt.value]; if (sz) { W = sz[0]; H = sz[1]; fit(); }
   msg.textContent = 'cargando…'; var want = keepT ? t : 0;
-  f.src = 'scene.html?w=' + W + '&h=' + H + '&_=' + Date.now();
+  f.src = 'scene.html?' + (sz ? 'w=' + sz[0] + '&h=' + sz[1] + '&' : '') + '_=' + Date.now();   // 'escena': sin w/h, usa su tamaño propio
   var tries = 0, iv = setInterval(function () {
     var w = win(); tries++;
     if (w && w.__ready) {
       clearInterval(iv); dur = w.__duration || 0; sc.max = dur;
+      var real = w.__size || [W || 1080, H || 1920], fixed = sz && (real[0] !== sz[0] || real[1] !== sz[1]);
+      W = real[0]; H = real[1]; fit();                     // el tamaño lo dice la escena, no un regex sobre el HTML
       [].slice.call(track.querySelectorAll('.cue')).forEach(function (n) { n.remove(); });
       (w.__cues || []).forEach(function (c) { var m = document.createElement('div'); m.className = 'cue'; m.title = c.name + ' @ ' + c.t.toFixed(2) + ' s';
         m.style.left = (c.t / dur * 100) + '%'; track.appendChild(m); });
-      show(want); msg.textContent = W + '×' + H + '  ·  ' + dur.toFixed(2) + ' s  ·  ' + (w.__cues || []).length + ' señales de sonido';
+      show(want); msg.textContent = W + '×' + H + '  ·  ' + dur.toFixed(2) + ' s  ·  ' + (w.__cues || []).length + ' señales de sonido' +
+        (fixed ? '  ·  ⚠ esta escena tiene tamaño fijo: no cambia de formato' : '');
     } else if (tries > 300) { clearInterval(iv); msg.textContent = 'la escena no llegó a __ready (mira la consola del iframe)'; }
   }, 50);
 }
@@ -110,11 +111,6 @@ def tailscale_ip():
         return None
 
 
-def scene_size(html):
-    m = re.search(r"\|\|\s*(\d+),\s*h:\s*\+q\.get\('h'\)\s*\|\|\s*(\d+)", html) or re.search(r"w:\s*(\d+),\s*h:\s*(\d+)", html)
-    return [int(m.group(1)), int(m.group(2))] if m else [1080, 1920]
-
-
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--scene", required=True)
@@ -124,7 +120,7 @@ def main():
     scene = pathlib.Path(a.scene).resolve(); root = scene.parent
     if scene.name != "scene.html":
         raise SystemExit("--scene tiene que ser el scene.html del proyecto")
-    page = PAGE.replace("__SIZE__", json.dumps(scene_size(scene.read_text()))).replace("__NAME__", root.name)
+    page = PAGE.replace("__NAME__", root.name)
     watch = [p for p in root.rglob("*") if p.is_file() and "node_modules" not in p.parts and p.suffix in (".js", ".html", ".css", ".json")]
 
     class H(http.server.SimpleHTTPRequestHandler):
@@ -137,10 +133,11 @@ def main():
 
         def do_GET(self):
             path = self.path.split("?")[0]
+            stamp = str(max((p.stat().st_mtime_ns for p in watch if p.exists()), default=0))
             if path in ("/", "/__preview__"):
-                body = page.encode()
+                body = page.replace("__STAMP__", stamp).encode()
             elif path == "/__mtime__":
-                body = str(max((p.stat().st_mtime_ns for p in watch if p.exists()), default=0)).encode()
+                body = stamp.encode()
             else:
                 return super().do_GET()
             self.send_response(200)

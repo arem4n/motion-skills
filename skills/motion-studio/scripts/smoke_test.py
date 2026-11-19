@@ -18,6 +18,12 @@ Trabaja en un directorio temporal; nunca escribe en la skill. Sale con código 1
    - tres líneas apiladas con `split:'words'`
      e interlineado apretado (0.9), bien
      separadas                                 -> text-overlap NO debe dar FAIL (la regresión del relleno de máscara)
+   - plantilla `three` en 9x16 sin el ajuste de
+     encuadre por proporción (objeto cortado)  -> three-framing debe dar FAIL (el validador ve el 3D cortado en el borde)
+3. HERRAMIENTAS (--no-tools las salta):
+   - `formats.py --only-sheet` sobre `blank` en 16x9 y 4x5: termina bien, 0 FAIL y arma la lámina de formatos.
+   - `preview.py` en 127.0.0.1, abierto con Chromium: carga la escena, el selector de formato cambia el tamaño real (lo dice
+     la escena, no un regex), recarga sola al editar `timeline.js`, y avisa cuando una escena de tamaño fijo no cambia de formato.
 """
 import argparse
 import json
@@ -65,12 +71,59 @@ def validate(scene, report, sheet, size=SIZE, query=None):
     return r, {x["check"].split(" ")[0]: x for x in data["results"]}
 
 
+def tools_preview(tmp, base, ok):
+    """preview.py de verdad: servidor + Chromium. Formato, tamaño real, recarga en vivo y aviso de tamaño fijo."""
+    from playwright.sync_api import sync_playwright
+    d = tmp / "pv"; shutil.copytree(base, d, ignore=shutil.ignore_patterns("node_modules"))
+    fixed = tmp / "pvfix"; shutil.copytree(base, fixed, ignore=shutil.ignore_patterns("node_modules"))
+    sh = (fixed / "scene.html").read_text()
+    (fixed / "scene.html").write_text(sh.replace("+q.get('w') || 1080", "1080").replace("+q.get('h') || 1920", "1920"))
+    procs = []
+    def serve(p):
+        pr = subprocess.Popen([sys.executable, "-I", str(HERE / "preview.py"), "--scene", str(p / "scene.html"), "--host", "127.0.0.1", "--port", "18760"],
+                              stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
+        procs.append(pr); line = pr.stdout.readline()
+        return line.split("http://")[1].split()[0] if "http://" in line else None
+    MSG = "document.getElementById('msg').textContent"
+    step = ["arranque"]
+    try:
+        url, url_fix = serve(d), serve(fixed)
+        if not url or not url_fix:
+            ok("preview.py arranca", False, "no imprimió la URL"); return
+        with sync_playwright() as p:
+            b = p.chromium.launch(); pg = b.new_page(viewport={"width": 1200, "height": 900})
+            step[0] = "carga"; pg.goto("http://" + url); pg.wait_for_function(f"{MSG}.includes('señales')", timeout=30000)
+            ok("preview.py carga la escena", True)
+            step[0] = "formatos"; pg.select_option("#fmt", "4x5"); pg.wait_for_function(f"{MSG}.startsWith('1080×1350')", timeout=30000)
+            pg.select_option("#fmt", "escena"); pg.wait_for_function(f"{MSG}.startsWith('1080×1920')", timeout=30000)
+            ok("preview.py: formato 4x5 y vuelta al tamaño de la escena", True)
+            step[0] = "recarga"; tl_ = d / "timeline.js"; src_ = tl_.read_text(); assert "Tu mensaje" in src_, "la plantilla blank cambió su texto"; tl_.write_text(src_.replace("Tu mensaje", "Recargado"))   # una palabra: el texto va partido en spans sin espacios
+            pg.wait_for_function("() => { try { return document.getElementById('f').contentDocument.body.textContent.includes('Recargado'); } catch (e) { return false; } }", timeout=30000)
+            ok("preview.py recarga al editar timeline.js", True)
+            step[0] = "tamaño fijo"; pg.goto("http://" + url_fix); pg.wait_for_function(f"{MSG}.includes('señales')", timeout=30000)
+            pg.select_option("#fmt", "16x9"); pg.wait_for_function(f"{MSG}.includes('señales')", timeout=30000)
+            msg = pg.evaluate(MSG)
+            ok("preview.py avisa que una escena de tamaño fijo no cambia de formato", msg.startswith("1080×1920") and "tamaño fijo" in msg, msg)
+            b.close()
+    except Exception as e:
+        extra = ""
+        try:
+            extra = " | msg=" + pg.evaluate(MSG)[:120]
+        except Exception:
+            pass
+        ok(f"preview.py ({step[0]})", False, str(e).splitlines()[0][:160] + extra)
+    finally:
+        for pr in procs:
+            pr.terminate()
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--only", help="formatos separados por coma (por defecto todos)")
     ap.add_argument("--no-controls", action="store_true", help="salta los controles negativos del validador")
     ap.add_argument("--matrix", action="store_true", help="además: 6 personalidades y 3 formatos por plantilla, exigiendo 0 FAIL")
     ap.add_argument("--keep", action="store_true", help="no borrar el directorio temporal")
+    ap.add_argument("--no-tools", action="store_true", help="salta formats.py y preview.py")
     a = ap.parse_args()
     fmts = a.only.split(",") if a.only else FORMATS
     tmp = pathlib.Path(tempfile.mkdtemp(prefix="ms-smoke-"))
@@ -127,6 +180,25 @@ def main():
                 st = res.get(check, {}).get("status", "(sin resultado)")
                 cond = (st == expect) if expect in ("fail", "warn", "pass") else (st != "fail" and check in res)
                 ok(name, cond, f"{check}={st}")
+            d = tmp / "ctl3d"                                     # el 3D cortado en el borde tiene que fallar
+            r = run([HERE / "new_project.py", "--project", d, "--format", "three", "--size", SIZE])
+            tl_ = (d / "timeline.js").read_text()
+            if r.returncode == 0 and "var fit = " in tl_:
+                (d / "timeline.js").write_text(tl_.replace("var fit = Math.max(1, 1.4 / (S.w / S.h + 0.45));", "var fit = 1;"))
+                r, res = validate(d / "scene.html", tmp / "ctl3d.json", tmp / "ctl3d.png")
+                st = res.get("three-framing", {}).get("status", "(sin resultado)")
+                ok("three sin ajuste de encuadre en 9x16 -> three-framing FAIL", st == "fail", f"three-framing={st}")
+            else:
+                ok("three sin ajuste de encuadre en 9x16 -> three-framing FAIL", False, "no se pudo preparar el control (¿cambió la plantilla?)")
+        if not a.no_tools:
+            print("3) Herramientas: formats.py y preview.py")
+            base = tmp / "blank"
+            if not base.exists():
+                run([HERE / "new_project.py", "--project", base, "--format", "blank", "--size", SIZE])
+            r = run([HERE / "formats.py", "--scene", base / "scene.html", "--out-dir", tmp / "fmt", "--formats", "16x9,4x5", "--only-sheet", "--name", "b"])
+            ok("formats.py --only-sheet 16x9,4x5: sin FAIL y con lámina", r.returncode == 0 and (tmp / "fmt" / "b-formatos.png").exists(),
+               (r.stdout + r.stderr).strip()[-200:])
+            tools_preview(tmp, base, ok)
     finally:
         if a.keep:
             print("directorio temporal:", tmp)

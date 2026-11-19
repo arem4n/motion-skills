@@ -24,6 +24,9 @@ Checks (exit code 1 if any FAIL):
                   render with --shutter)
   read-time       texts of >= 5 words stay on screen >= chars/15 + 1.5 s (warn; fine when the narration says the same words)
   framing         elements marked with MG.inFrame(el[, 'whole']) leave the frame (fail)
+  three-framing   a 3D mesh cut by the frame edge in a settled frame: part in, part out (fail). Projects the real vertices;
+                  fully off-screen meshes are fine (entrances), floor/ao helpers are skipped, opt out with mesh.userData.crop = true
+  three-size      at its largest across settled frames, the 3D occupies < 30 % of the frame on its larger side (warn): hero too small
 Settled frames = frames that barely differ from the previous 0.1 s sample, so entrances in flight are not judged.
 """
 import argparse
@@ -326,6 +329,7 @@ def main():
         base = strict if len(strict) >= 3 else settled   # strict: nothing in flight (an iris/push can hide a scene under another)
         pick = sorted(set(base[:: max(1, len(base) // 12)] + [D]))
         out_of_safe, small, low, piled = [], [], [], []
+        cut3d, size3d, has3d = [], None, False
         min_font = 1e9
         for t in pick:
             png = grab(page, t); im = Image.open(io.BytesIO(png)).convert("RGB"); arr = np.array(im)
@@ -336,6 +340,20 @@ def main():
             # canvas dimensions in design px: stage is scaled to fit, so ratio of design/css is design_w / sw
             design_w = page.evaluate("document.querySelector('.mg-stage').offsetWidth"); design_h = page.evaluate("document.querySelector('.mg-stage').offsetHeight")
             k = design_w / sw
+            boxes = page.evaluate("window.__threeBoxes ? window.__threeBoxes() : null")
+            if boxes is not None:
+                has3d = True; tol_x, tol_y = 0.005 * design_w, 0.005 * design_h; ux0 = uy0 = 1e9; ux1 = uy1 = -1e9
+                for b in boxes:
+                    if b["behind"] or (b["x1"] - b["x0"] > design_w and b["y1"] - b["y0"] > design_h):
+                        continue                     # cámara dentro del objeto o fondo más grande que el cuadro
+                    inside = b["x1"] > 0 and b["x0"] < design_w and b["y1"] > 0 and b["y0"] < design_h
+                    if inside and (b["x0"] < -tol_x or b["x1"] > design_w + tol_x or b["y0"] < -tol_y or b["y1"] > design_h + tol_y):
+                        side = "left" if b["x0"] < -tol_x else "right" if b["x1"] > design_w + tol_x else "top" if b["y0"] < -tol_y else "bottom"
+                        cut3d.append((round(t, 1), b["name"], side))
+                    if inside:
+                        ux0, uy0 = min(ux0, max(0, b["x0"])), min(uy0, max(0, b["y0"])); ux1, uy1 = max(ux1, min(design_w, b["x1"])), max(uy1, min(design_h, b["y1"]))
+                frac = max((ux1 - ux0) / design_w, (uy1 - uy0) / design_h) if ux1 > ux0 else 0.0
+                size3d = max(size3d or 0.0, frac)          # el mayor tamaño entre los cuadros quietos (una pieza puede terminar vacía a propósito)
             tx = [it for it in m["items"] if it["kind"] == "text"]
             for i, p_ in enumerate(tx):
                 for q_ in tx[i + 1:]:
@@ -367,6 +385,14 @@ def main():
                     large = fs >= 0.04 * min(design_w, design_h)
                     if cr < (3.0 if large else 4.5):
                         low.append((round(t, 1), it["text"], round(cr, 1)))
+        if has3d:
+            c3 = sorted(set(cut3d))
+            add("three-framing", "fail" if c3 else "pass",
+                f"3D cut by the frame edge (time, mesh, side): {c3[:5]} — pull the camera back, or mesh.userData.crop = true if intended" if c3
+                else f"no 3D mesh cut by the frame in {len(pick)} settled frames")
+            if size3d is not None:
+                add("three-size", "warn" if size3d < 0.30 else "pass",
+                    f"3D occupies at most {size3d*100:.0f}% of the frame: the hero reads small" if size3d < 0.30 else f"3D occupies up to {size3d*100:.0f}% of the frame")
         pl = sorted(set(piled))
         add("text-overlap", "fail" if pl else "pass",
             f"texts on top of each other: {pl[:4]}" if pl else f"no overlapping texts in {len(pick)} settled frames")

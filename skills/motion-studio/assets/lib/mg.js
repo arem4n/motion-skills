@@ -728,7 +728,7 @@
     /** Transparent plane that only shows the shadow of objects above it (a contact shadow). */
     t3.ground = function (y, opacity) {
       var g = new TH.Mesh(new TH.PlaneGeometry(40, 40), new TH.ShadowMaterial({ opacity: opacity == null ? 0.35 : opacity }));
-      g.rotation.x = -Math.PI / 2; g.position.y = y || 0; g.receiveShadow = true; scene.add(g); return g;
+      g.rotation.x = -Math.PI / 2; g.position.y = y || 0; g.receiveShadow = true; g.userData.mgHelper = true; scene.add(g); return g;
     };
     /**
      * Calibrated material presets, so a scene never hand-tunes glass or metal again. t3.mat('metal', {color: 0xdadfe6})
@@ -870,7 +870,7 @@
       var tx = new TH.CanvasTexture(k);
       var m = new TH.Mesh(new TH.PlaneGeometry(radius * 2, radius * 2),
         new TH.MeshBasicMaterial({ map: tx, transparent: true, opacity: opacity == null ? 0.5 : opacity, depthWrite: false }));
-      m.rotation.x = -Math.PI / 2; m.position.y = 0.002; m.renderOrder = 1; scene.add(m); return m;
+      m.rotation.x = -Math.PI / 2; m.position.y = 0.002; m.renderOrder = 1; m.userData.mgHelper = true; scene.add(m); return m;
     };
     /** Texture from text drawn on a 2D canvas (fonts must already be loaded: MG.ready does that). */
     t3.textTexture = function (text, c) {
@@ -903,6 +903,27 @@
       renderer.render(scene, t3.camera);
       t3._post.forEach(function (f) { f(t); });                   // DOM passes (bloom): after the pixels exist
     };
+    /** Para validate.py: rectángulo en pantalla (px de diseño) de cada malla visible, proyectando sus vértices reales (no la caja,
+     *  que en un objeto rotado es más grande que la silueta). Se saltan el suelo/ao (userData.mgHelper) y lo marcado userData.crop. */
+    t3.boxes = function () {
+      var out = [], v = new TH.Vector3(), cx = o.x || 0, cy = o.y || 0;
+      t3.camera.updateMatrixWorld(); scene.updateMatrixWorld(true);
+      scene.traverseVisible(function (m) {
+        if (!m.isMesh || m.userData.mgHelper || m.userData.crop || !m.geometry || !m.geometry.attributes.position) return;
+        var p = m.geometry.attributes.position, n = p.count, stride = Math.max(1, Math.floor(n / 3000));
+        var x0 = 1e9, y0 = 1e9, x1 = -1e9, y1 = -1e9, behind = false, clip = (m.material && m.material.clippingPlanes) || [];
+        for (var i = 0; i < n; i += stride) {
+          v.fromBufferAttribute(p, i).applyMatrix4(m.matrixWorld);
+          if (clip.some(function (pl) { return pl.distanceToPoint(v) < 0; })) continue;   // lo que un plano de recorte oculta no se ve
+          v.project(t3.camera);
+          if (v.z > 1 || v.z < -1) { behind = true; continue; }
+          var sx = cx + (v.x * 0.5 + 0.5) * W, sy = cy + (-v.y * 0.5 + 0.5) * H;
+          if (sx < x0) x0 = sx; if (sx > x1) x1 = sx; if (sy < y0) y0 = sy; if (sy > y1) y1 = sy;
+        }
+        if (x1 > x0) out.push({ name: m.name || (m.geometry.type || 'mesh').replace('Geometry', ''), x0: x0, y0: y0, x1: x1, y1: y1, behind: behind });
+      });
+      return out;
+    };
     threes.push(t3);
     return t3;
   };
@@ -916,6 +937,8 @@
     if (th.length) tl.eventCallback('onUpdate', function () { renderThrees(tl, th); });   // after every seek, once all tweens have set their state
     w.__tl = tl;
     w.__duration = tl.duration();
+    w.__size = STAGE ? [STAGE.w, STAGE.h] : null;          // tamaño real del escenario (la vista previa lo lee)
+    w.__threeBoxes = th.length ? function () { var r = []; th.forEach(function (x) { r = r.concat(x.boxes()); }); return r; } : null;   // validate.py: 3D en pantalla (solo si hay 3D)
     // never seek to exactly 0: GSAP reverts zero-duration tweens positioned at 0 there and does not re-apply them going forward
     w.__seek = function (t) {
       if (sf) t = Math.floor(t * sf + 1e-6) / sf;
