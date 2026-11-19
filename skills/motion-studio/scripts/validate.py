@@ -393,6 +393,11 @@ def main():
             if size3d is not None:
                 add("three-size", "warn" if size3d < 0.30 else "pass",
                     f"3D occupies at most {size3d*100:.0f}% of the frame: the hero reads small" if size3d < 0.30 else f"3D occupies up to {size3d*100:.0f}% of the frame")
+        elif page.evaluate("!!window.THREE"):
+            # never let a 3D scene pass silently: if three.js is loaded but no mesh reached __threeBoxes, say so
+            # (a mesh that throws while building, or a canvas that never gets a mesh, used to look like a clean run)
+            add("three-framing", "warn",
+                "three.js is loaded but no 3D mesh was exposed in the settled frames: three-framing/three-size did NOT run (check the console for a MG.three error)")
         pl = sorted(set(piled))
         add("text-overlap", "fail" if pl else "pass",
             f"texts on top of each other: {pl[:4]}" if pl else f"no overlapping texts in {len(pick)} settled frames")

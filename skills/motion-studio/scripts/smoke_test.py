@@ -145,6 +145,9 @@ def main():
             r, res = validate(d / "scene.html", tmp / f"{f}.json", tmp / f"{f}.png")
             bad = [f"{k}={v['status']}" for k, v in res.items() if v["status"] != "pass"]
             ok(f"{f}: validate ({len(res) - len(bad)}/{len(res)} PASS)", res and not bad, ", ".join(bad))
+            if f == "three":
+                has = res.get("three-framing", {}).get("status") == "pass" and res.get("three-size", {}).get("status") == "pass"
+                ok("three: los chequeos 3D corrieron de verdad", has, f"checks vistos: {sorted(res)}")
             r = run([HERE / "entity_qa.py", "--scene", d / "scene.html", "--size", SIZE])
             ok(f"{f}: entity_qa sin FAIL", r.returncode == 0, r.stdout.strip().splitlines()[-1][:160] if r.stdout.strip() else r.stderr[-160:])
         if a.matrix:
