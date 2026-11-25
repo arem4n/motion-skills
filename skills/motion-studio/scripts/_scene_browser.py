@@ -53,7 +53,13 @@ def open_scene(scene, width, height, query=""):
         if not any(p.startswith(("w=", "h=")) for p in q):      # el formato viaja en la URL: la escena lo lee si es relativa
             q += [f"w={width}", f"h={height}"]
         page.goto(f"file://{scene}?{'&'.join(q)}")
-        page.wait_for_function("window.__ready === true", timeout=15000)
+        try:
+            page.wait_for_function("window.__ready === true", timeout=15000)
+        except Exception:
+            # el error de JS es la causa real; el traceback de playwright no dice nada útil
+            why = "; ".join(dict.fromkeys(errors))[:400] or "no console error was logged"
+            browser.close()
+            raise SystemExit(f"la escena no terminó de cargar en 15 s ({scene.name}): {why}")
         page.evaluate("document.fonts.ready")
         info = page.evaluate("({duration: window.__duration, labels: window.__labels, cues: window.__cues || []})")
         try:
