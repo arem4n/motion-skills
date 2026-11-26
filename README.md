@@ -1,4 +1,4 @@
-# motion-skills
+# motion-studio
 
 Dos skills de Claude para generar motion graphics en video de forma determinista (cada fotograma es función pura del tiempo: GSAP + Chromium + ffmpeg).
 
@@ -33,7 +33,7 @@ Tras cambiar el kit, una plantilla o el validador: `$PY -I skills/motion-studio/
 - No hay evaluación comparativa formal ni descripción optimizada para activación automática.
 - No exporta a HyperFrames (ver `skills/motion-studio/references/engine.md`).
 - Remotion es opcional (clips, voz con subtítulos, varias escenas): `references/router.md`, `remotion.md`, `subtitulos.md`. Su licencia depende del tamaño de la empresa.
-- Historial de versiones en GitHub: <https://github.com/arem4n/motion-skills> (público). El instalador `motion-studio.skill` se descarga del release: <https://github.com/arem4n/motion-skills/releases>. `dist/` no se versiona; se regenera con `python3 build.py`.
+- Historial de versiones en GitHub: <https://github.com/arem4n/motion-studio> (público). El instalador `motion-studio.skill` se descarga del release: <https://github.com/arem4n/motion-studio/releases>. `dist/` no se versiona; se regenera con `python3 build.py`.
 - Sin licencia declarada todavía: público no significa usable.
 
 Ver `NOTICE.md` para créditos y licencias de terceros.
