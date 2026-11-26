@@ -4,3 +4,6 @@ __pycache__/
 out/
 *.mp4
 dist/
+contact_sheet.png
+validation_report.json
+*.skill
