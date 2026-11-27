@@ -29,7 +29,7 @@ Pendiente de mapear uno a uno. En el canal hay 5: `El cine como espejo` (80 vist
 
 - `videos/erp-southsoft-v2` → `out/erp-southsoft-con-voz.mp4`, 45 s. Pieza corporativa SouthSoft.
 - `videos/tommybox-logo-3d` y `-v2` → logo reveal 3D, 5,7 s y 5,0 s.
-- `videos/hermes-sistema-agentes` → proyecto completo (SPEC + escena + `hoja-contactos.png`), sin render final.
+- `videos/hermes-sistema-agentes` → 31,8 s y 32,1 s (v2), 1080x1920. Los dos MP4 quedaron en `~/` (`hermes-sistema-agentes-9x16.mp4`, `-v2.mp4`), fuera de la carpeta del proyecto; por eso el primer inventario no los encontró.
 - `videos/metasergius-ilusion-sombra` → 33,5 s.
 - `videos/metasergius-percepcion-director` → **no es motion-studio**: está hecho con HyperFrames (`hyperframes.json`, `index.motion.json`). Sirve como comparación entre motores, no como evidencia de este.
 
